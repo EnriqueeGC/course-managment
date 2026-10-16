@@ -1,4 +1,5 @@
 import { env } from '@/config/env';
+import axios, { type AxiosRequestConfig } from 'axios';
 
 const BASE_URL = env.API_URL;
 
@@ -25,87 +26,70 @@ export type QueryValue =
 
 export type QueryParams = Record<string, QueryValue>;
 
-export interface ApiOptions extends RequestInit {
+export interface ApiOptions extends AxiosRequestConfig {
   params?: QueryParams;
-};
+}
+
+const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+function cleanQueryParams(
+  params?: QueryParams,
+): Record<string, any> | undefined {
+  if (!params) return undefined;
+
+  const cleaned: Record<string, any> = {};
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') {
+      return;
+    }
+    if (Array.isArray(value)) {
+      const validItems = value.filter(
+        (item) => item !== undefined && item !== null && item !== '',
+      );
+      if (validItems.length > 0) {
+        cleaned[key] = validItems;
+      }
+      return;
+    }
+    cleaned[key] = value;
+  });
+
+  return cleaned;
+}
 
 export async function apiClient<T>(
   endpoint: string,
   options: ApiOptions = {},
 ): Promise<T> {
-  const { params, headers: customHeaders, ...restOptions } = options;
+  const { params, headers, ...restOptions } = options;
+  const cleanedParams = cleanQueryParams(params);
 
-  const normalizedBase = BASE_URL.replace(/\/+$/, '');
-  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  let url = `${normalizedBase}${normalizedEndpoint}`;
-
-  if (params){
-    const searchParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value === undefined || value === null || value === ''){
-        return;
-      }
-      if (Array.isArray(value)) {
-        value.forEach((item) => {
-          if (item !== undefined && item !== null && item !== '') {
-            searchParams.append(key, String(item));
-          }
-        });
-        return;
-      }
-      searchParams.append(key, String(value));
+  try {
+    const response = await axiosInstance.request<T>({
+      url: endpoint,
+      params: cleanedParams,
+      headers,
+      ...restOptions,
     });
-
-    const queryString = searchParams.toString();
-    if(queryString){
-      const separator = url.includes('?') ? '&' : '?';
-      url += `${separator}${queryString}`;
-    };
-  };
-
-  // COnfigure default headers
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...customHeaders,
-  };
-
-  // Execute request
-  const response = await fetch(url, {
-    ...restOptions,
-    headers,
-    credentials: options.credentials ?? 'include',
-  });
-
-  // Centralized Error Handling
-  if (!response.ok) {
-    let errorData: unknown;
-    try {
-      errorData = await response.json();
-    } catch {
-      // response was not json
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status ?? 500;
+      const errorData = error.response?.data;
+      const message =
+        error.message || 'An error occurred while making the API request.';
+      throw new ApiError(status, message, errorData);
     }
-
-    // Intercept specific status codes
-    if (response.status === 401) {
-      // Clear local session or trigger redirect to login
-      if (
-        typeof window !== 'undefined' &&
-        !window.location.pathname.startsWith('/login')
-      ) {
-        window.location.href = '/login';
-      }
-    }
-
     throw new ApiError(
-      response.status,
-      `API Request Failed: ${response.statusText}`,
-      errorData,
+      500,
+      error instanceof Error ? error.message : 'An unknown error occurred.',
     );
   }
-
-  if (response.status === 204){
-    return {} as T;
-  };
-
-  return (await response.json()) as T;
 }
