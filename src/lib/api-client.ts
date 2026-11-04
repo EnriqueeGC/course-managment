@@ -40,10 +40,10 @@ const axiosInstance = axios.create({
 
 function cleanQueryParams(
   params?: QueryParams,
-): Record<string, any> | undefined {
+): Record<string, unknown> | undefined {
   if (!params) return undefined;
 
-  const cleaned: Record<string, any> = {};
+  const cleaned: Record<string, unknown> = {};
 
   Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === null || value === '') {
