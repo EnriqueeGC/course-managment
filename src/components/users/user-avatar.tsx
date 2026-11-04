@@ -40,8 +40,9 @@ function getColorFromName(name: string) {
   return colors[Math.abs(hash) % colors.length];
 }
 
-export function getAvatar({ name }: { name: string }) {
+export function UserAvatar({ name }: { name: string }) {
   const { logout } = useAuth();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
