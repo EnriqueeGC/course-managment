@@ -1,7 +1,6 @@
 import { LoginForm } from '@/features/auth/components/authForm';
-import { WelcomeBack } from '@/components/auth/WelcomeBack';
 import { useAuth } from '@/features/auth/context/auth.context';
-import { Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 export function HomePage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -15,11 +14,7 @@ export function HomePage() {
   }
 
   if (isAuthenticated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center flex-row">
-        <WelcomeBack />
-      </div>
-    );
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
