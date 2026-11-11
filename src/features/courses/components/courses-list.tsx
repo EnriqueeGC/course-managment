@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ApiError } from '@/lib/api-client';
+import { getApiErrorMessage } from '@/lib/api-client';
 import { getCourses } from '../api/get-courses';
-import type { Course, PaginatedCourses } from '../types';
+import type { Course, CourseMutationResult, PaginatedCourses } from '../types';
+import { CourseFormDialog } from './course-form-dialog';
+import { CourseResultDialog } from './course-result-dialog';
+import { DeleteCourseDialog } from './delete-course-dialog';
 
 const COURSES_PER_PAGE = 10;
+
+interface CourseResult {
+  title: string;
+  message: string;
+  course?: Course;
+}
 
 export function CoursesList() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -13,6 +22,12 @@ export function CoursesList() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [reloadToken, setReloadToken] = useState(0);
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [deletingCourse, setDeletingCourse] = useState<Course | null>(null);
+  const [result, setResult] = useState<CourseResult | null>(null);
 
   useEffect(() => {
     let isActive = true;
@@ -22,24 +37,21 @@ export function CoursesList() {
       setError(null);
 
       try {
-        const result = await getCourses({ page, limit: COURSES_PER_PAGE });
+        const data = await getCourses({ page, limit: COURSES_PER_PAGE });
 
         if (!isActive) return;
 
-        setCourses(result.data);
-        setMeta(result.meta);
+        setCourses(data.data);
+        setMeta(data.meta);
       } catch (err) {
         if (!isActive) return;
 
-        if (err instanceof ApiError) {
-          const errorData = err.data as { message?: string } | undefined;
-          setError(
-            errorData?.message ??
-              'Something went wrong while loading courses.',
-          );
-        } else {
-          setError('Something went wrong while loading courses.');
-        }
+        setError(
+          getApiErrorMessage(
+            err,
+            'Something went wrong while loading courses.',
+          ),
+        );
       } finally {
         if (isActive) setIsLoading(false);
       }
@@ -50,26 +62,54 @@ export function CoursesList() {
     return () => {
       isActive = false;
     };
-  }, [page]);
+  }, [page, reloadToken]);
 
-  if (isLoading) {
-    return (
-      <p className="text-sm text-slate-500 dark:text-slate-400">
-        Loading courses...
-      </p>
-    );
-  }
+  const openCreateForm = () => {
+    setEditingCourse(null);
+    setIsFormOpen(true);
+  };
 
-  if (error) {
-    return (
-      <p
-        role="alert"
-        className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-900/10 dark:text-red-400"
-      >
-        {error}
-      </p>
-    );
-  }
+  const openEditForm = (course: Course) => {
+    setEditingCourse(course);
+    setIsFormOpen(true);
+  };
+
+  const closeForm = () => {
+    setIsFormOpen(false);
+    setEditingCourse(null);
+  };
+
+  const handleFormSuccess = (mutation: CourseMutationResult) => {
+    const wasEditing = Boolean(editingCourse);
+
+    setIsFormOpen(false);
+    setEditingCourse(null);
+    setResult({
+      title: wasEditing ? 'Course updated' : 'Course created',
+      message: mutation.message,
+      course: mutation.course,
+    });
+    setReloadToken((token) => token + 1);
+  };
+
+  const handleDeleteSuccess = ({
+    message,
+    course,
+  }: {
+    message: string;
+    course: Course;
+  }) => {
+    const wasLastOnPage = courses.length === 1 && page > 1;
+
+    setDeletingCourse(null);
+    setResult({ title: 'Course deleted', message, course });
+
+    if (wasLastOnPage) {
+      setPage((current) => Math.max(1, current - 1));
+    } else {
+      setReloadToken((token) => token + 1);
+    }
+  };
 
   return (
     <section className="space-y-4">
@@ -85,12 +125,24 @@ export function CoursesList() {
           size="icon"
           aria-label="Create course"
           title="Create course"
+          onClick={openCreateForm}
         >
           <Plus />
         </Button>
       </div>
 
-      {courses.length === 0 ? (
+      {isLoading ? (
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Loading courses...
+        </p>
+      ) : error ? (
+        <p
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-900/10 dark:text-red-400"
+        >
+          {error}
+        </p>
+      ) : courses.length === 0 ? (
         <p className="text-sm text-slate-500 dark:text-slate-400">
           No courses available.
         </p>
@@ -121,6 +173,7 @@ export function CoursesList() {
                     size="icon-sm"
                     aria-label={`Edit ${course.title}`}
                     title="Edit course"
+                    onClick={() => openEditForm(course)}
                   >
                     <Pencil />
                   </Button>
@@ -130,6 +183,7 @@ export function CoursesList() {
                     size="icon-sm"
                     aria-label={`Delete ${course.title}`}
                     title="Delete course"
+                    onClick={() => setDeletingCourse(course)}
                   >
                     <Trash2 />
                   </Button>
@@ -140,7 +194,7 @@ export function CoursesList() {
         </ul>
       )}
 
-      {meta && meta.totalPages > 1 && (
+      {!isLoading && !error && meta && meta.totalPages > 1 && (
         <nav
           className="flex items-center justify-between gap-4 pt-2"
           aria-label="Courses pagination"
@@ -167,6 +221,32 @@ export function CoursesList() {
             Next
           </Button>
         </nav>
+      )}
+
+      {isFormOpen && (
+        <CourseFormDialog
+          key={editingCourse?.id ?? 'new'}
+          course={editingCourse}
+          onClose={closeForm}
+          onSuccess={handleFormSuccess}
+        />
+      )}
+
+      {deletingCourse && (
+        <DeleteCourseDialog
+          course={deletingCourse}
+          onClose={() => setDeletingCourse(null)}
+          onSuccess={handleDeleteSuccess}
+        />
+      )}
+
+      {result && (
+        <CourseResultDialog
+          title={result.title}
+          message={result.message}
+          course={result.course}
+          onClose={() => setResult(null)}
+        />
       )}
     </section>
   );

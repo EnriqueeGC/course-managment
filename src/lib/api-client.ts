@@ -30,6 +30,23 @@ export interface ApiOptions extends AxiosRequestConfig {
   params?: QueryParams;
 }
 
+export interface ApiErrorBody {
+  message?: string;
+  errors?: Record<string, string>;
+}
+
+export function getApiErrorMessage(
+  error: unknown,
+  fallback: string,
+): string {
+  if (error instanceof ApiError) {
+    const data = error.data as ApiErrorBody | undefined;
+    return data?.message ?? error.message ?? fallback;
+  }
+
+  return fallback;
+}
+
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
