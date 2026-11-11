@@ -4,18 +4,18 @@ import type {
   CoursePayload,
   CreateCourseApiResponse,
 } from '../types';
-import { mapCourseApiDataToCourse } from '../types';
+import { mapCourseMutationToCourse } from '../types';
 
 export async function createCourse(
   data: CoursePayload,
 ): Promise<CourseMutationResult> {
   const response = await apiClient<CreateCourseApiResponse>('/api/courses/', {
     method: 'POST',
-    data: JSON.stringify(data),
+    data,
   });
 
   return {
     message: response.message,
-    course: mapCourseApiDataToCourse(response.data),
+    course: mapCourseMutationToCourse(response.course),
   };
 }

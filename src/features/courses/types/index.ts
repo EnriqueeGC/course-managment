@@ -44,34 +44,29 @@ export interface CourseMutationResult {
   course: Course;
 }
 
-export interface CourseApiData {
-  courseId?: number;
-  id?: number;
+export interface CourseApiMutation {
+  courseId: number;
   title: string;
   description: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export function mapCourseApiDataToCourse(data: CourseApiData): Course {
-  const id = data.courseId ?? data.id;
-
-  if (id === undefined) {
-    throw new Error('Course response is missing an id.');
-  }
-
+export function mapCourseMutationToCourse(
+  course: CourseApiMutation,
+): Course {
   return {
-    id,
-    title: data.title,
-    description: data.description,
-    createdAt: new Date(data.createdAt),
-    updatedAt: new Date(data.updatedAt),
+    id: Number(course.courseId),
+    title: course.title,
+    description: course.description,
+    createdAt: course.createdAt ? new Date(course.createdAt) : new Date(),
+    updatedAt: course.updatedAt ? new Date(course.updatedAt) : new Date(),
   };
 }
 
 export interface CreateCourseApiResponse {
   message: string;
-  data: CourseApiData;
+  course: CourseApiMutation;
 }
 
 export type UpdateCourseApiResponse = CreateCourseApiResponse;

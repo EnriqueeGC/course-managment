@@ -4,7 +4,7 @@ import type {
   CoursePayload,
   UpdateCourseApiResponse,
 } from '../types';
-import { mapCourseApiDataToCourse } from '../types';
+import { mapCourseMutationToCourse } from '../types';
 
 export async function updateCourse(
   id: number,
@@ -14,12 +14,12 @@ export async function updateCourse(
     `/api/courses/${id}`,
     {
       method: 'PUT',
-      data: JSON.stringify(data),
+      data,
     },
   );
 
   return {
     message: response.message,
-    course: mapCourseApiDataToCourse(response.data),
+    course: mapCourseMutationToCourse(response.course),
   };
 }
