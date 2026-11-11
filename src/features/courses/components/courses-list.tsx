@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ApiError } from '@/lib/api-client';
-import { getCourses } from '../api/get-users';
+import { getCourses } from '../api/get-courses';
 import type { Course, PaginatedCourses } from '../types';
 
 const COURSES_PER_PAGE = 10;
