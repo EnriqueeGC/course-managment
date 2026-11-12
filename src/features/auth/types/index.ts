@@ -5,12 +5,19 @@ export const ROLE_MAP: Record<number, Role> = {
   2: 'STUDENT',
 };
 
-export interface AuthApiResponse {
-  message: string;
+export interface ApiUserData {
   userId: number;
   name: string;
   email: string;
   role: number; // 1 or 2
+}
+
+export interface AuthApiResponse extends ApiUserData {
+  message: string;
+}
+
+export interface AuthMeApiResponse {
+  user: ApiUserData;
 }
 
 export interface ApiUser{
@@ -20,24 +27,15 @@ export interface ApiUser{
   role: Role;
 }
 
-export function mapApiUserToAuthUser(res: AuthApiResponse): ApiUser {
-  const role = ROLE_MAP[res.role];
+export function mapApiUserToAuthUser(user: ApiUserData): ApiUser {
+  const role = ROLE_MAP[user.role];
   if (!role) {
-    throw new Error(`Unknown role received from API: ${res.role}`);
+    throw new Error(`Unknown role received from API: ${user.role}`);
   }
   return {
-    id: res.userId,
-    name: res.name,
-    email: res.email,
+    id: user.userId,
+    name: user.name,
+    email: user.email,
     role,
   };
 }
-
-//  "message": "User registered successfully",
-//     "user": {
-//         "userId": 5,
-//         "name": "Messi",
-//         "email": "messi@gmail.com",
-//         "role": 2
-//     },
-//     "token": 

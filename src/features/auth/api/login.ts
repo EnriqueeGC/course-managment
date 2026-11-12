@@ -3,6 +3,7 @@ import {
   mapApiUserToAuthUser,
   type ApiUser,
   type AuthApiResponse,
+  type AuthMeApiResponse,
 } from '../types';
 
 export interface LoginCredentials {
@@ -21,8 +22,8 @@ export async function loginWithEmail(
 }
 
 export async function getCurrentUser(): Promise<ApiUser> {
-  const response = await apiClient<AuthApiResponse>('/api/auth/me');
-  return mapApiUserToAuthUser(response);
+  const response = await apiClient<AuthMeApiResponse>('/api/auth/me');
+  return mapApiUserToAuthUser(response.user);
 }
 
 export async function logoutRequest(): Promise<void> {
