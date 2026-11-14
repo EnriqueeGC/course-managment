@@ -1,5 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import type {
+  Role,
   UpdateUserProfileApiResponse,
   UpdateUserProfilePayload,
   UserMutationResult,
@@ -9,6 +10,7 @@ import { ROLE_MAP, mapUserMutationToUser } from '../types';
 export async function updateUserProfile(
   id: number,
   data: UpdateUserProfilePayload,
+  fallbackRole: Role = 'STUDENT',
 ): Promise<UserMutationResult> {
   const response = await apiClient<UpdateUserProfileApiResponse>(
     `/api/users/profile/${id}`,
@@ -18,7 +20,8 @@ export async function updateUserProfile(
     },
   );
 
-  const fallbackRole = ROLE_MAP[data.role] ?? 'STUDENT';
+  const payloadRole =
+    data.role !== undefined ? ROLE_MAP[data.role] : undefined;
   const apiUser = response.user ??
     response.data ?? {
       userId: id,
@@ -29,6 +32,6 @@ export async function updateUserProfile(
 
   return {
     message: response.message,
-    user: mapUserMutationToUser(apiUser, fallbackRole),
+    user: mapUserMutationToUser(apiUser, payloadRole ?? fallbackRole),
   };
 }

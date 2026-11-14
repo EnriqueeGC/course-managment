@@ -56,12 +56,13 @@ export interface CreateUserPayload {
   name: string;
   email: string;
   password: string;
+  role: number;
 }
 
 export interface UpdateUserProfilePayload {
   name: string;
   email: string;
-  role: number;
+  role?: number;
 }
 
 export interface UpdateUserPasswordPayload {

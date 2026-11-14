@@ -10,10 +10,10 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useUserPasswordForm } from '../hooks/use-user-password-form';
-import type { User, UserPasswordResult } from '../types';
+import type { UserPasswordResult } from '../types';
 
 interface UserPasswordDialogProps {
-  user: User;
+  user: { id: number; name: string };
   onClose: () => void;
   onSuccess: (result: UserPasswordResult) => void;
 }

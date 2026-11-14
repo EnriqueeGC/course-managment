@@ -4,7 +4,7 @@ import type {
   CreateUserPayload,
   UserMutationResult,
 } from '../types';
-import { mapUserMutationToUser } from '../types';
+import { ROLE_MAP, mapUserMutationToUser } from '../types';
 
 export async function createUser(
   data: CreateUserPayload,
@@ -17,6 +17,9 @@ export async function createUser(
 
   return {
     message: response.message,
-    user: mapUserMutationToUser(response, 'STUDENT'),
+    user: mapUserMutationToUser(
+      response,
+      ROLE_MAP[data.role] ?? 'STUDENT',
+    ),
   };
 }

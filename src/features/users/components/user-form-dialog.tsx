@@ -100,30 +100,7 @@ export function UserFormDialog({
             )}
           </div>
 
-          {isEditing ? (
-            <div className="space-y-1.5">
-              <label
-                htmlFor="user-role"
-                className="text-sm font-medium text-slate-700 dark:text-slate-300"
-              >
-                Role
-              </label>
-              <select
-                id="user-role"
-                className="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm text-slate-900 transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:text-white"
-                aria-invalid={Boolean(errors.role)}
-                {...register('role')}
-              >
-                <option value="STUDENT">Student</option>
-                <option value="ADMIN">Administrator</option>
-              </select>
-              {errors.role && (
-                <span className="text-xs text-red-500">
-                  {errors.role.message}
-                </span>
-              )}
-            </div>
-          ) : (
+          {!isEditing && (
             <div className="space-y-1.5">
               <label
                 htmlFor="user-password"
@@ -146,6 +123,29 @@ export function UserFormDialog({
               )}
             </div>
           )}
+
+          <div className="space-y-1.5">
+            <label
+              htmlFor="user-role"
+              className="text-sm font-medium text-slate-700 dark:text-slate-300"
+            >
+              Role
+            </label>
+            <select
+              id="user-role"
+              className="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm text-slate-900 transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:text-white"
+              aria-invalid={Boolean(errors.role)}
+              {...register('role')}
+            >
+              <option value="STUDENT">Student</option>
+              <option value="ADMIN">Administrator</option>
+            </select>
+            {errors.role && (
+              <span className="text-xs text-red-500">
+                {errors.role.message}
+              </span>
+            )}
+          </div>
 
           <DialogFooter>
             <DialogClose

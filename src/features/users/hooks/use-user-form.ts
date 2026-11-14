@@ -62,11 +62,15 @@ export function useUserForm({ user, onSuccess }: UseUserFormOptions) {
           return;
         }
 
-        const result = await updateUserProfile(user.id, {
-          name: data.name,
-          email: data.email,
-          role: ROLE_TO_API[data.role],
-        });
+        const result = await updateUserProfile(
+          user.id,
+          {
+            name: data.name,
+            email: data.email,
+            role: ROLE_TO_API[data.role],
+          },
+          user.role,
+        );
 
         onSuccess(result);
         return;
@@ -81,6 +85,7 @@ export function useUserForm({ user, onSuccess }: UseUserFormOptions) {
         name: data.name,
         email: data.email,
         password: data.password,
+        role: ROLE_TO_API[data.role],
       });
 
       onSuccess(result);

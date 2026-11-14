@@ -24,6 +24,7 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
+  updateUser: (user: ApiUser) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -64,9 +65,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUser = useCallback((updatedUser: ApiUser) => {
+    setUser(updatedUser);
+  }, []);
+
   const value = useMemo(
-    () => ({ user, isLoading, isAuthenticated: user !== null, login, logout, register }),
-    [user, isLoading],
+    () => ({
+      user,
+      isLoading,
+      isAuthenticated: user !== null,
+      login,
+      logout,
+      register,
+      updateUser,
+    }),
+    [user, isLoading, updateUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -23,11 +23,20 @@ export function getUserFormSchema(isEditing: boolean) {
     name: nameSchema,
     email: emailSchema,
     password: isEditing ? z.string().optional() : passwordSchema,
-    role: isEditing ? roleSchema : roleSchema.optional(),
+    role: roleSchema,
   });
 }
 
 export type UserFormData = z.infer<ReturnType<typeof getUserFormSchema>>;
+
+export const updateUserProfileSchema = z.object({
+  name: nameSchema,
+  email: emailSchema,
+});
+
+export type UpdateUserProfileFormData = z.infer<
+  typeof updateUserProfileSchema
+>;
 
 export const updateUserPasswordSchema = z
   .object({
