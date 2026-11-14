@@ -1,6 +1,11 @@
-import { CoursesList } from '@/features/courses/components/courses-list';
+import { useAuth } from '@/features/auth/context/auth.context';
+import { AssignmentsList } from '@/features/assignments/components/assignments-list';
 
 export function MyCoursesPage() {
+  const { user } = useAuth();
+
+  if (!user) return null;
+
   return (
     <section className="space-y-6">
       <header>
@@ -12,7 +17,12 @@ export function MyCoursesPage() {
         </p>
       </header>
 
-      <CoursesList />
+      <AssignmentsList
+        role={user.role}
+        currentUserId={user.id}
+        currentUserName={user.name}
+        mode="courses"
+      />
     </section>
   );
 }

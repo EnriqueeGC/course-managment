@@ -1,5 +1,5 @@
 import { useAuth } from '@/features/auth/context/auth.context';
-import { AssignmentsList } from '@/features/assignments/components/assignments-list';
+import { StudentAssignmentCreate } from '@/features/assignments/components/student-assignment-create';
 
 export function MyAssignmentsPage() {
   const { user } = useAuth();
@@ -13,12 +13,11 @@ export function MyAssignmentsPage() {
           My Assignments
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Review and keep track of the assignments assigned to you.
+          Create a new assignment by selecting a course.
         </p>
       </header>
 
-      <AssignmentsList
-        role={user.role}
+      <StudentAssignmentCreate
         currentUserId={user.id}
         currentUserName={user.name}
       />

@@ -13,6 +13,10 @@ interface AssignmentResultDialogProps {
   title: string;
   message: string;
   assignment?: Assignment | null;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
   onClose: () => void;
 }
 
@@ -20,6 +24,7 @@ export function AssignmentResultDialog({
   title,
   message,
   assignment,
+  action,
   onClose,
 }: AssignmentResultDialogProps) {
   return (
@@ -47,9 +52,20 @@ export function AssignmentResultDialog({
         )}
 
         <DialogFooter>
-          <Button type="button" onClick={onClose}>
-            Close
-          </Button>
+          {action ? (
+            <>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Close
+              </Button>
+              <Button type="button" onClick={action.onClick}>
+                {action.label}
+              </Button>
+            </>
+          ) : (
+            <Button type="button" onClick={onClose}>
+              Close
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getApiErrorMessage } from '@/lib/api-client';
 import type { Role } from '@/features/auth/types';
@@ -25,13 +26,17 @@ interface AssignmentsListProps {
   role: Role;
   currentUserId: number;
   currentUserName: string;
+  mode?: 'assignments' | 'courses';
 }
 
 export function AssignmentsList({
   role,
   currentUserId,
   currentUserName,
+  mode = 'assignments',
 }: AssignmentsListProps) {
+  const isCoursesView = mode === 'courses';
+  const itemLabel = isCoursesView ? 'course' : 'assignment';
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [meta, setMeta] = useState<PaginatedAssignments['meta'] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,7 +77,9 @@ export function AssignmentsList({
         setError(
           getApiErrorMessage(
             err,
-            'Something went wrong while loading assignments.',
+            isCoursesView
+              ? 'Something went wrong while loading your courses.'
+              : 'Something went wrong while loading assignments.',
           ),
         );
       } finally {
@@ -85,7 +92,7 @@ export function AssignmentsList({
     return () => {
       isActive = false;
     };
-  }, [page, reloadToken, userId]);
+  }, [page, reloadToken, userId, isCoursesView]);
 
   const openCreateForm = () => {
     setEditingAssignment(null);
@@ -139,26 +146,28 @@ export function AssignmentsList({
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500 dark:text-slate-400">
           {meta
-            ? `${meta.totalItems} assignment${
+            ? `${meta.totalItems} ${itemLabel}${
                 meta.totalItems === 1 ? '' : 's'
               }`
             : ''}
         </p>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          aria-label="Create assignment"
-          title="Create assignment"
-          onClick={openCreateForm}
-        >
-          <Plus />
-        </Button>
+        {!isCoursesView && (
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            aria-label="Create assignment"
+            title="Create assignment"
+            onClick={openCreateForm}
+          >
+            <Plus />
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Loading assignments...
+          {isCoursesView ? 'Loading courses...' : 'Loading assignments...'}
         </p>
       ) : error ? (
         <p
@@ -168,11 +177,23 @@ export function AssignmentsList({
           {error}
         </p>
       ) : assignments.length === 0 ? (
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          {role === 'STUDENT'
-            ? 'You have no assignments yet.'
-            : 'No assignments available.'}
-        </p>
+        isCoursesView ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-gray-800">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              You are not assigned to any courses yet.
+            </p>
+            <Button
+              render={<Link to="/student/assignments" />}
+              className="mt-4"
+            >
+              Create assignment
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            No assignments available.
+          </p>
+        )
       ) : (
         <ul className="space-y-3">
           {assignments.map((assignment) => (
@@ -185,15 +206,23 @@ export function AssignmentsList({
                   <h3 className="text-base font-semibold text-slate-900 dark:text-white">
                     {assignment.course.title}
                   </h3>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Assigned to {assignment.user.name}
-                  </p>
-                  <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
-                    Created {assignment.createdAt.toLocaleDateString()} ·
-                    Updated {assignment.updatedAt.toLocaleDateString()}
-                  </p>
+                  {isCoursesView ? (
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                      Assigned {assignment.createdAt.toLocaleDateString()}
+                    </p>
+                  ) : (
+                    <>
+                      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        Assigned to {assignment.user.name}
+                      </p>
+                      <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
+                        Created {assignment.createdAt.toLocaleDateString()} ·
+                        Updated {assignment.updatedAt.toLocaleDateString()}
+                      </p>
+                    </>
+                  )}
                 </div>
-                {role === 'ADMIN' && (
+                {!isCoursesView && role === 'ADMIN' && (
                   <div className="flex shrink-0 items-center gap-1">
                     <Button
                       type="button"
@@ -226,7 +255,9 @@ export function AssignmentsList({
       {!isLoading && !error && meta && meta.totalPages > 1 && (
         <nav
           className="flex items-center justify-between gap-4 pt-2"
-          aria-label="Assignments pagination"
+          aria-label={
+            isCoursesView ? 'My courses pagination' : 'Assignments pagination'
+          }
         >
           <Button
             type="button"
@@ -252,7 +283,7 @@ export function AssignmentsList({
         </nav>
       )}
 
-      {isFormOpen && (
+      {!isCoursesView && isFormOpen && (
         <AssignmentFormDialog
           key={editingAssignment?.id ?? 'new'}
           role={role}
