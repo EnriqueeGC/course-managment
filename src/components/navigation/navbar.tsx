@@ -3,6 +3,7 @@ import { Menu } from 'lucide-react';
 import { useAuth } from '@/features/auth/context/auth.context';
 import { ModeToggle } from './toggle-mode';
 import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { UserAvatar } from '@/components/users/user-avatar';
 
 interface NavbarProps {
@@ -38,9 +39,7 @@ export function Navbar({ showMenuButton = false, onMenuClick }: NavbarProps) {
           </Link>
         </div>
         {isLoading ? (
-          <div className="flex items-center gap-4">
-            <span>Loading...</span>
-          </div>
+          <LoadingSpinner />
         ) : isAuthenticated ? (
           <div className="flex items-center gap-2 sm:gap-4">
             <span className="hidden sm:inline">Welcome, {user?.name}</span>

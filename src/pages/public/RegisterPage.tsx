@@ -1,16 +1,13 @@
 import { Navigate } from 'react-router-dom';
 import { RegisterForm } from '@/features/auth/components/registerForm';
 import { useAuth } from '@/features/auth/context/auth.context';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export function RegisterPage() {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500 dark:text-gray-400">Loading…</p>
-      </div>
-    );
+    return <LoadingSpinner fullPage />;
   }
 
   if (isAuthenticated) {
