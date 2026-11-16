@@ -7,8 +7,10 @@ import { Navbar } from '@/components/navigation/navbar';
 import { Footer } from '@/components/footer/footer';
 import { WelcomeBack } from '@/components/auth/WelcomeBack';
 import { DashboardLayout } from '@/app/layouts/dashboard-layout';
+import { ProtectedRoute } from '@/features/auth/components/protected-route';
 import { HomePage } from '@/pages/public/HomePage';
 import { RegisterPage } from '@/pages/public/RegisterPage';
+import { NotFoundPage } from '@/pages/not-found-page';
 import { AdminUsersPage } from '@/pages/admin/users-page';
 import { AdminCoursesPage } from '@/pages/admin/courses-page';
 import { AdminAssignmentsPage } from '@/pages/admin/assignments-page';
@@ -51,29 +53,45 @@ const router = createBrowserRouter([
     ),
   },
   {
-    element: <DashboardLayout />,
-    children: [{ path: '/dashboard', element: <WelcomeBack /> }],
-  },
-  {
-    element: <DashboardLayout requiredRole="ADMIN" />,
-    children: [
-      { path: '/admin', element: <Navigate to="/admin/users" replace /> },
-      { path: '/admin/users', element: <AdminUsersPage /> },
-      { path: '/admin/courses', element: <AdminCoursesPage /> },
-      { path: '/admin/assignments', element: <AdminAssignmentsPage /> },
-    ],
-  },
-  {
-    element: <DashboardLayout requiredRole="STUDENT" />,
+    element: <ProtectedRoute />,
     children: [
       {
-        path: '/student',
-        element: <Navigate to="/student/courses" replace />,
+        element: <DashboardLayout />,
+        children: [{ path: '/dashboard', element: <WelcomeBack /> }],
       },
-      { path: '/student/courses', element: <MyCoursesPage /> },
-      { path: '/student/assignments', element: <MyAssignmentsPage /> },
     ],
   },
+  {
+    element: <ProtectedRoute requiredRole="ADMIN" />,
+    children: [
+      {
+        element: <DashboardLayout />,
+        children: [
+          { path: '/admin', element: <Navigate to="/admin/users" replace /> },
+          { path: '/admin/users', element: <AdminUsersPage /> },
+          { path: '/admin/courses', element: <AdminCoursesPage /> },
+          { path: '/admin/assignments', element: <AdminAssignmentsPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    element: <ProtectedRoute requiredRole="STUDENT" />,
+    children: [
+      {
+        element: <DashboardLayout />,
+        children: [
+          {
+            path: '/student',
+            element: <Navigate to="/student/courses" replace />,
+          },
+          { path: '/student/courses', element: <MyCoursesPage /> },
+          { path: '/student/assignments', element: <MyAssignmentsPage /> },
+        ],
+      },
+    ],
+  },
+  { path: '*', element: <NotFoundPage /> },
 ]);
 
 export function AppRouter() {

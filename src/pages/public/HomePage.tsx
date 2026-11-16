@@ -1,20 +1,31 @@
 import { LoginForm } from '@/features/auth/components/authForm';
 import { useAuth } from '@/features/auth/context/auth.context';
-import { Navigate } from 'react-router-dom';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Navigate, useLocation } from 'react-router-dom';
+
+interface LoginLocationState {
+  from?: {
+    pathname: string;
+    search?: string;
+    hash?: string;
+  };
+}
 
 export function HomePage() {
   const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500 dark:text-gray-400">Loading…</p>
-      </div>
-    );
+    return <LoadingSpinner fullPage />;
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    const from = (location.state as LoginLocationState | null)?.from;
+    const redirectTo = from
+      ? `${from.pathname}${from.search ?? ''}${from.hash ?? ''}`
+      : '/dashboard';
+
+    return <Navigate to={redirectTo} replace />;
   }
 
   return (
