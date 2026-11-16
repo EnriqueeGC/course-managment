@@ -7,16 +7,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        default:
+          "bg-brand-600 text-white shadow-sm shadow-brand-600/20 hover:bg-brand-700 hover:shadow-md hover:shadow-brand-600/25 active:bg-brand-800 dark:bg-brand-600 dark:text-white dark:shadow-brand-600/20 dark:hover:bg-brand-700 dark:hover:shadow-brand-600/25 dark:active:bg-brand-800",
         outline:
-          "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border-brand-200 bg-white text-slate-700 shadow-sm shadow-slate-900/5 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 aria-expanded:border-brand-300 aria-expanded:bg-brand-50 aria-expanded:text-brand-700 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-brand-500/40 dark:hover:bg-brand-500/10 dark:hover:text-brand-200 dark:aria-expanded:border-brand-500/40 dark:aria-expanded:bg-brand-500/10 dark:aria-expanded:text-brand-200",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "bg-brand-50 text-brand-700 hover:bg-brand-100 aria-expanded:bg-brand-100 aria-expanded:text-brand-700 dark:bg-brand-500/10 dark:text-brand-200 dark:hover:bg-brand-500/20 dark:aria-expanded:bg-brand-500/20",
         ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "text-slate-700 hover:bg-brand-50 hover:text-brand-700 aria-expanded:bg-brand-50 aria-expanded:text-brand-700 dark:text-slate-300 dark:hover:bg-brand-500/10 dark:hover:text-brand-200 dark:aria-expanded:bg-brand-500/10 dark:aria-expanded:text-brand-200",
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-brand-600 underline-offset-4 hover:text-brand-700 hover:underline dark:text-brand-400 dark:hover:text-brand-300",
       },
       size: {
         default:
